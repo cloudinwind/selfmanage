@@ -1,0 +1,497 @@
+<!--总的 数据分析页面-->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+
+    <link rel="stylesheet" href="/time/layui/css/layui.css">
+    <script src="/time/layui/layui.js"></script>
+    <script src="/time/js/echarts.js"></script>
+    <script src="/time/js/echarts.js.map"></script>
+    <script src="/time/js/jquery-2.1.1.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+
+    <script>
+        // 当前时间
+        let nowDate1 =[[${nowDate1}]]
+        console.log("nowDate:", nowDate1)
+    </script>
+
+</head>
+
+<body>
+
+<h3 style="text-align:center;" id="nowDate" th:href="'时间:'+ ${nowDate1}"></h3>
+<div>
+    <div id="taskLabelPie" style="width: 450px;height:360px;float: left"></div>
+
+    <div id="taskPriorityPie" style="width: 450px;height:360px;float: left"></div>
+</div>
+
+<div style="clear: both;">
+    <div id="taskLabelBar" style="width: 450px;height:360px;float: left"></div>
+
+    <div id="taskPriorityBar" style="width: 450px;height:360px;float: left"></div>
+</div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var taskLabelPie = echarts.init(document.getElementById("taskLabelPie"))
+    var taskPriorityPie = echarts.init(document.getElementById("taskPriorityPie"))
+
+    var taskLabelBar = echarts.init(document.getElementById("taskLabelBar"))
+    var taskPriorityBar = echarts.init(document.getElementById("taskPriorityBar"))
+
+    layui.use(['table','jquery','form','tree', 'laydate'],function() {
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var tree = layui.tree;
+        var laydate = layui.laydate;
+
+        // 初始化条件查询时间
+        laydate.render({
+            elem: '#nowDate'
+            , type: 'date' // 可选择年月日
+            , format: 'yyyy-MM-dd'
+
+            , ready: function (date) {
+                console.log(date); //得到初始的日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+            }
+            , done: function (value, date) {
+                console.log("condition", value)
+                console.log("condition", date)
+                window.location.href = "/time/taskAnalysisDay?nowDate=" + value;
+            }
+        });
+
+        $.ajax({
+            url: '/task/selectUserTaskGroupByLabelDay',
+            dataType: 'JSON',
+            contentType: "application/json;charset=UTF-8",
+            type: 'GET',
+            data:{nowDate: nowDate1},
+            success: function (result) {
+                console.log("1111111")
+                console.log(result.data)
+
+                // 饼状图数据
+                let labelPie=[]
+                // 柱状图数据
+                let dataY=[]
+                let dataBar=[]
+                resultData = result.data
+                for (let i=0; i<resultData.length; i++)
+                {
+                    // 饼状图
+                    var tt = {value: resultData[i]['sumDuration'], name: resultData[i]['labelName']}
+                    labelPie.push(tt)
+                    // 柱状图
+                    dataY.push(resultData[i]['labelName'])
+                    dataBar.push(resultData[i]['sumDuration'])
+                }
+
+                // 分类占比 饼状图
+                taskLabelOption = {
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    title: {
+                        text: "分类占比",
+                        left: "center"
+                    },
+                    legend: {
+                        top: '8%',
+                        left: 'center'
+                    },
+                    series: [
+                        {
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            avoidLabelOverlap: false,
+                            label: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    fontSize: '25',
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            data: labelPie
+                        }
+                    ]
+                };
+
+                taskLabelPie.setOption(taskLabelOption)
+
+
+                // 分类时长 柱状图
+                taskLabelBarOption = {
+                    title: {
+                        text: '各分类时长'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'value',
+                        boundaryGap: [0, 0.01]
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: dataY
+                    },
+                    series: [
+                        {
+                            name: '时长',
+                            type: 'bar',
+                            data: dataBar
+                        },
+                    ]
+                };
+
+                taskLabelBar.setOption(taskLabelBarOption)
+            }
+        });
+
+        $.ajax({
+            url: '/task/selectUserTaskGroupByPriorityDay',
+            dataType: 'JSON',
+            contentType: "application/json;charset=UTF-8",
+            type: 'GET',
+            data:{nowDate: nowDate1},
+            success: function (result) {
+                console.log("1111111")
+                console.log("priority", result.data)
+
+
+                // 饼状图数据
+                let priorityPie=[]
+                // 柱状图数据
+                let dataY=[]
+                let dataBar=[]
+                // 遍历json数据, 重新组合成echarts显示的数据
+                resultData = result.data
+                for (let i=0; i<resultData.length; i++)
+                {
+                    let priorityNum = resultData[i]['priority']
+                    // 优先级进行对应
+                    let priorityStr;
+                    if (priorityNum == 0) priorityStr='重要紧急'
+                    else if (priorityNum == 1) priorityStr='重要不紧急'
+                    else if(priorityNum == 2) priorityStr='紧急不重要'
+                    else  priorityStr='不重要不紧急'
+
+                    // 饼状图数据重组
+                    var tt = {value: resultData[i]['sumDuration'], name: priorityStr}
+                    priorityPie.push(tt)
+                    // 柱状图数据重组
+                    dataY.push(priorityStr)
+                    dataBar.push(resultData[i]['sumDuration'])
+                }
+
+                // 优先级 饼状图
+                taskPriorityOption = {
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    title: {
+                        text: "优先级占比",
+                        left: "center"
+                    },
+                    legend: {
+                        top: '8%',
+                        left: 'center'
+                    },
+                    series: [
+                        {
+                            name: 'Access From',
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            avoidLabelOverlap: false,
+                            itemStyle: {
+                                borderRadius: 10,
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            },
+                            label: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    fontSize: '25',
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            data: priorityPie
+                        }
+                    ]
+                };
+
+                taskPriorityPie.setOption(taskPriorityOption)
+
+                // 优先级 柱状图
+                taskPriorityBarOption = {
+                    title: {
+                        text: '各优先级时长'
+                    },
+                    grid: {
+                        left: '8%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [
+                        {
+                            data: dataBar,
+                            type: 'bar'
+                        }
+                    ]
+                };
+                console.log(dataBar)
+                taskPriorityBar.setOption(taskPriorityBarOption)
+
+            }
+        });
+
+
+
+
+
+        // $.ajax({
+        //     url: '/platform/selectCharacterPie',
+        //     dataType: 'JSON',
+        //     contentType: "application/json;charset=UTF-8",
+        //     type: 'GET',
+        //     success: function (result) {
+        //         console.log("1111111")
+        //         console.log(result.data)
+        //
+        //         let red = result.data.red;
+        //         let blue = result.data.blue;
+        //         let yellow= result.data.yellow;
+        //         let green = result.data.green;
+        //
+        //         let sum = (red + blue + yellow + green) * 1.0
+        //
+        //         let redPie = ((red/sum).toFixed(4) * 100)
+        //         let bluePie = ((blue/sum).toFixed(4) * 100)
+        //         let yellowPie = ((yellow/sum).toFixed(4) * 100)
+        //         let greenPie = ((green/sum).toFixed(4) * 100)
+        //
+        //
+        //         // 每种性格 人数
+        //         var characterPeopleNumberOption = {
+        //
+        //             title:{
+        //                 text: "性格人数统计",
+        //                 left: "center"
+        //             },
+        //
+        //             tooltip: {
+        //                 trigger: 'axis',
+        //                 axisPointer: {
+        //                     type: 'shadow'
+        //                 }
+        //             },
+        //             grid: {
+        //                 left: '3%',
+        //                 right: '4%',
+        //                 bottom: '3%',
+        //                 containLabel: true
+        //             },
+        //             xAxis: [
+        //                 {
+        //                     type: 'category',
+        //                     data: ['Red', 'Blue', 'Yellow', 'Green'],
+        //                     axisTick: {
+        //                         alignWithLabel: true
+        //                     }
+        //                 }
+        //             ],
+        //             yAxis: [
+        //                 {
+        //                     type: 'value'
+        //                 }
+        //             ],
+        //             series: [
+        //                 {
+        //                     name: 'Direct',
+        //                     type: 'bar',
+        //                     barWidth: '60%',
+        //                     data: [result.data.red, result.data.blue, result.data.yellow,result.data.green ]
+        //                 }
+        //             ]
+        //         };
+        //         characterPeopleNumberChart.setOption(characterPeopleNumberOption)
+        //
+        //     }
+        // });
+        //
+        // // 每道题每个选项选择人数
+        // $.ajax({
+        //     url: '/platform/getResultOfQuestionAndSelection',
+        //     dataType: 'JSON',
+        //     contentType: "application/json;charset=UTF-8",
+        //     type: 'GET',
+        //     success: function (result) {
+        //         console.log("getResultOfQuestionAndSelection:")
+        //         console.log(result.data)
+        //
+        //         var dataResult = result.data;
+        //         // 题目设置
+        //         let xAxisData = [];
+        //         let data1 = [];
+        //         let data2 = [];
+        //         let data3 = [];
+        //         let data4 = [];
+        //         for (let i = 1; i <= 30; i++) {
+        //             xAxisData.push(i);
+        //             // 遍历数据
+        //             let flag = 0;
+        //             for (let j=0; j < dataResult.length; j++){
+        //
+        //                 if (dataResult[j].questionId == i) {
+        //
+        //                     if (dataResult[j].answer == 'A') {
+        //                         data1.push(dataResult[j].sumNumber);
+        //                         flag += 1;
+        //                     } else  if (dataResult[j].answer == 'B'){
+        //                         data2.push(dataResult[j].sumNumber);
+        //                         flag += 1;
+        //                     }else  if (dataResult[j].answer == 'C'){
+        //                         data3.push(dataResult[j].sumNumber)
+        //                         flag += 1;
+        //                     }else  if (dataResult[j].answer == 'D'){
+        //                         data4.push(dataResult[j].sumNumber)
+        //                         flag += 1;
+        //                     }
+        //                 }
+        //
+        //                 if (flag == 4) break;
+        //             }
+        //
+        //
+        //             // data1.push(+(Math.random() * 2).toFixed(2));
+        //             // data2.push(+(Math.random() * 5).toFixed(2));
+        //             // data3.push(+(Math.random() + 0.3).toFixed(2));
+        //             // data4.push(+Math.random().toFixed(2));
+        //         }
+        //         var emphasisStyle = {
+        //             itemStyle: {
+        //                 shadowBlur: 10,
+        //                 shadowColor: 'rgba(0,0,0,0.3)'
+        //             }
+        //         };
+        //         var questionPeopleOption = {
+        //             title:{
+        //                 text: "每个问题每个选项人数统计",
+        //                 left: "center"
+        //             },
+        //             legend: {
+        //                 data: ['A', 'B', 'C', 'D'],
+        //                 left: '10%'
+        //             },
+        //             toolbox: {
+        //                 feature: {
+        //                     magicType: {
+        //                         type: ['stack']
+        //                     },
+        //                     dataView: {}
+        //                 }
+        //             },
+        //             tooltip: {},
+        //             xAxis: {
+        //                 data: xAxisData,
+        //                 name: '题号',
+        //                 axisLine: { onZero: true },
+        //                 splitLine: { show: false },
+        //                 splitArea: { show: false }
+        //             },
+        //             yAxis: {},
+        //             grid: {
+        //                 bottom: 100
+        //             },
+        //             series: [
+        //                 {
+        //                     name: 'A',
+        //                     type: 'bar',
+        //                     stack: 'one',
+        //                     emphasis: emphasisStyle,
+        //                     data: data1
+        //                 },
+        //                 {
+        //                     name: 'B',
+        //                     type: 'bar',
+        //                     stack: 'one',
+        //                     emphasis: emphasisStyle,
+        //                     data: data2
+        //                 },
+        //                 {
+        //                     name: 'C',
+        //                     type: 'bar',
+        //                     stack: 'two',
+        //                     emphasis: emphasisStyle,
+        //                     data: data3
+        //                 },
+        //                 {
+        //                     name: 'D',
+        //                     type: 'bar',
+        //                     stack: 'two',
+        //                     emphasis: emphasisStyle,
+        //                     data: data4
+        //                 }
+        //             ]
+        //         };
+        //
+        //         questionPeopleChart.setOption(questionPeopleOption);
+        //
+        //     }
+        // });
+    })
+
+
+
+
+
+
+</script>
+</body>
+
+
+</html>

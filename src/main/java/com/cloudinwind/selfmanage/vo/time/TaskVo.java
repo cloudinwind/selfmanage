@@ -11,6 +11,8 @@ public class TaskVo {
     private Integer userId;
 
     private Integer priority;
+
+    private String priorityStr;
     //任务开始时间
     private Date startTime;
     //任务结束时间
@@ -47,4 +49,8 @@ public class TaskVo {
     private String endDateCondition;
 
     private String nowDate;
+
+    private Integer sumDuration;
+
+    private Integer sumDurationAll;
 }

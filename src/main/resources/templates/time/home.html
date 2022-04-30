@@ -60,7 +60,7 @@
                     <dl class="layui-nav-child">
                         <dd>
                             <!--    <a th:href="${child.url}" th:text="${child.title}"></a>-->
-                            <a class="" th:href="@{/tester/toResultManage}">
+                            <a class="" th:href="@{/time/toTimeLine}">
 <!--                                <i th:class=""></i>-->
                                 <span th:text="任务复盘"></span>
                             </a>
@@ -70,7 +70,7 @@
                     <dl class="layui-nav-child">
                         <dd>
                             <!--    <a th:href="${child.url}" th:text="${child.title}"></a>-->
-                            <a class="" th:href="@{/toPlatform}">
+                            <a class="" th:href="@{/time/taskAnalysisDay}">
 <!--                                <i th:class=""></i>-->
                                 <span th:text="任务分析"></span>
                             </a>
@@ -79,57 +79,9 @@
                     </dl>
                 </li>
 
-<!--                <li class="layui-nav-item layui-nav-itemed">-->
-<!--                    <a class="" href="javascript:;">-->
-<!--                        <i th:class="layui-icon layui-icon-app"></i>-->
-<!--                        <span th:text="标签管理"></span>-->
-<!--                    </a>-->
-<!--                    <dl class="layui-nav-child" th:each="child : ${menu.children}">-->
-<!--                        <dd>-->
-<!--                            &lt;!&ndash;    <a th:href="${child.url}" th:text="${child.title}"></a>&ndash;&gt;-->
-<!--                            <a class="" th:href="${child.url}">-->
-<!--                                <i th:class="${child.icon}"></i>-->
-<!--                                <span th:text="${child.title}"></span>-->
-<!--                            </a>-->
-
-<!--                        </dd>-->
-<!--                    </dl>-->
-<!--                </li>-->
-
-<!--                <li class="layui-nav-item layui-nav-itemed">-->
-<!--                    <a class="" href="javascript:;">-->
-<!--                        <i th:class="layui-icon layui-icon-log"></i>-->
-<!--                        <span th:text="任务分析"></span>-->
-<!--                    </a>-->
-<!--                    <dl class="layui-nav-child" th:each="child : ${menu.children}">-->
-<!--                        <dd>-->
-<!--                            &lt;!&ndash;    <a th:href="${child.url}" th:text="${child.title}"></a>&ndash;&gt;-->
-<!--                            <a class="" th:href="${child.url}">-->
-<!--                                <i th:class="${child.icon}"></i>-->
-<!--                                <span th:text="${child.title}"></span>-->
-<!--                            </a>-->
-
-<!--                        </dd>-->
-<!--                    </dl>-->
-<!--                </li>-->
-
-<!--                <li th:each="menu:${menus}" class="layui-nav-item layui-nav-itemed">-->
-<!--                    <a class="" href="javascript:;">-->
-<!--                        <i th:class="${menu.icon}"></i>-->
-<!--                        <span th:text="${menu.title}"></span>-->
-<!--                    </a>-->
-<!--                    <dl class="layui-nav-child" th:each="child : ${menu.children}">-->
-<!--                        <dd>-->
-<!--                            &lt;!&ndash;    <a th:href="${child.url}" th:text="${child.title}"></a>&ndash;&gt;-->
-<!--                            <a class="" th:href="${child.url}">-->
-<!--                                <i th:class="${child.icon}"></i>-->
-<!--                                <span th:text="${child.title}"></span>-->
-<!--                            </a>-->
-
-<!--                        </dd>-->
-<!--                    </dl>-->
-<!--                </li>-->
             </ul>
+
+
         </div>
     </div>
 

@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -63,7 +64,6 @@ public class TaskController extends BaseController{
         Long countTask = taskService.countTask(taskVo).longValue();
         return success(taskVoList, countTask);
     }
-
 
     @PostMapping("saveTask")
     public ReturnBean save(@RequestBody TaskVo taskVo){
@@ -115,4 +115,61 @@ public class TaskController extends BaseController{
         else return fail(idList);
     }
 
+
+    // 日分析 标签占比
+    @RequestMapping("selectUserTaskGroupByLabelDay")
+    public ReturnBean selectUserTaskGroupByLabelDay(@RequestParam(required = false, value = "nowDate")String nowDate,
+            HttpServletRequest request){
+
+        TaskVo taskVo = new TaskVo();
+
+        // 设置用户id
+        UserDTO loginuser = (UserDTO) request.getAttribute("loginUser");
+        taskVo.setUserId(loginuser.getId().intValue());
+
+        // 设置查询时间
+//        if (nowDate==null) {
+//            Date date = new Date();
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            nowDate = sdf.format(date);
+//        }
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        nowDate = sdf.format(date);
+
+        System.out.println("nowDate Task:"+nowDate);
+        taskVo.setNowDate(nowDate);
+
+        List<TaskVo> taskVos = taskService.selectUserTaskGroupByLabelDay(taskVo);
+
+        return success(taskVos, "success");
+    }
+
+    // 日分析 优先级占比
+    @RequestMapping("selectUserTaskGroupByPriorityDay")
+    public ReturnBean selectUserTaskGroupByPriorityDay(@RequestParam(required = false, value = "nowDate")String nowDate,
+                                                       HttpServletRequest request){
+
+        TaskVo taskVo = new TaskVo();
+
+        // 设置用户id
+        UserDTO loginuser = (UserDTO) request.getAttribute("loginUser");
+        taskVo.setUserId(loginuser.getId().intValue());
+
+        // 设置查询时间
+//        if (nowDate==null) {
+//            Date date = new Date();
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//            nowDate = sdf.format(date);
+//        }
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        nowDate = sdf.format(date);
+
+        taskVo.setNowDate(nowDate);
+
+        List<TaskVo> taskVos = taskService.selectUserTaskGroupByPriorityDay(taskVo);
+
+        return success(taskVos, "success");
+    }
 }

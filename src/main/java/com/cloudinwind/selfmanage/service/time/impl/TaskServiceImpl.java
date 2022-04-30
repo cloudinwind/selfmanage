@@ -28,8 +28,28 @@ public class TaskServiceImpl extends ServiceImpl<TaskDao, Task> implements TaskS
     }
 
     @Override
+    public List<TaskVo> selectUserTask(TaskVo taskVo) {
+        return taskDao.selectUserTask(taskVo);
+    }
+
+    @Override
     public Integer countTask(TaskVo taskVo) {
         return taskDao.countTask(taskVo);
+    }
+
+    @Override
+    public List<TaskVo> selectUserTaskGroupByLabelDay(TaskVo taskVo) {
+        return taskDao.selectUserTaskGroupByLabelDay(taskVo);
+    }
+
+    @Override
+    public List<TaskVo> selectUserTaskGroupByPriorityDay(TaskVo taskVo) {
+        return taskDao.selectUserTaskGroupByPriorityDay(taskVo);
+    }
+
+    @Override
+    public Integer selectTaskDuration(TaskVo taskVo) {
+        return taskDao.selectTaskDuration(taskVo);
     }
 }
 

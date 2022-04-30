@@ -18,7 +18,15 @@ public interface TaskService extends IService<Task> {
 
     List<TaskVo> selectByPage(Integer page, Integer limit, TaskVo taskVo);
 
+    List<TaskVo> selectUserTask(TaskVo taskVo);
+
     Integer countTask(TaskVo taskVo);
+
+
+    List<TaskVo> selectUserTaskGroupByLabelDay( TaskVo taskVo);
+    List<TaskVo> selectUserTaskGroupByPriorityDay( TaskVo taskVo);
+
+    Integer selectTaskDuration( TaskVo taskVo);
 
 }
 

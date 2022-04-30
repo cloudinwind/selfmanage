@@ -87,6 +87,71 @@
     </select>
 
 
+    <!--查询该用户的所有Task-->
+    <select id="selectUserTask" resultType="com.cloudinwind.selfmanage.vo.time.TaskVo">
+        select t1.*, t2.label_name, t2.label_color
+        from
+        (select time_task.* from time_user_task, time_task
+        where time_user_task.user_id = #{taskVo.userId} and time_task.task_id = time_user_task.task_id and time_task.flag=0)
+        as t1
+        left join time_label t2 on t1.label_id = t2.label_id
+        <where>
+            <if test="taskVo.taskId != null">
+                and task_id = #{taskVo.taskId}
+            </if>
+            <if test="taskVo.priority != null">
+                and priority = #{taskVo.priority}
+            </if>
+            <if test="taskVo.startTime != null">
+                and start_time = #{taskVo.startTime}
+            </if>
+            <if test="taskVo.endTime != null">
+                and end_time = #{taskVo.endTime}
+            </if>
+            <if test="taskVo.taskContent != null and taskVo.taskContent != ''">
+                and task_content like concat(concat('%',#{taskVo.taskContent}),'%')
+            </if>
+            <if test="taskVo.timePeriod != null and taskVo.timePeriod != ''">
+                and time_period = #{taskVo.timePeriod}
+            </if>
+            <if test="taskVo.finished != null">
+                and finished = #{taskVo.finished}
+            </if>
+            <if test="taskVo.labelId != null">
+                and t1.label_id = #{taskVo.labelId}
+            </if>
+            <if test="taskVo.startDateCondition != null and taskVo.startDateCondition != '' ">
+                and t1.create_time &gt;= #{taskVo.startDateCondition}
+            </if>
+            <if test="taskVo.endDateCondition != null and taskVo.endDateCondition != '' ">
+                and t1.create_time &lt;= #{taskVo.endDateCondition}
+            </if>
+            <if test="taskVo.nowDate != null and taskVo.nowDate != '' ">
+                and date(t1.create_time) = #{taskVo.nowDate}
+            </if>
+            <if test="taskVo.updateTime != null">
+                and t1.update_time = #{taskVo.updateTime}
+            </if>
+            <if test="taskVo.explan != null and taskVo.explan != ''">
+                and explan = #{taskVo.explan}
+            </if>
+            <if test="taskVo.parentId != null">
+                and parent_id = #{taskVo.parentId}
+            </if>
+            <if test="taskVo.duration != null">
+                and duration = #{taskVo.duration}
+            </if>
+            <if test="taskVo.childTask != null and taskVo.childTask != ''">
+                and child_task = #{taskVo.childTask}
+            </if>
+            <if test="taskVo.flag != null">
+                and flag = #{taskVo.flag}
+            </if>
+        </where>
+        order by time_period
+    </select>
+
+
     <!--根据用户id分页查询task-->
     <select id="countTask" resultType="java.lang.Integer">
         select count(*)
@@ -95,6 +160,88 @@
         where time_user_task.user_id = #{taskVo.userId} and time_task.task_id = time_user_task.task_id and time_task.flag=0)
         as t1
         left join time_label t2 on t1.label_id = t2.label_id
+        <where>
+            <if test="taskVo.taskId != null">
+                and task_id = #{taskVo.taskId}
+            </if>
+            <if test="taskVo.priority != null">
+                and priority = #{taskVo.priority}
+            </if>
+            <if test="taskVo.startTime != null">
+                and start_time = #{taskVo.startTime}
+            </if>
+            <if test="taskVo.endTime != null">
+                and end_time = #{taskVo.endTime}
+            </if>
+            <if test="taskVo.taskContent != null and taskVo.taskContent != ''">
+                and task_content like concat(concat('%',#{taskVo.taskContent}),'%')
+            </if>
+            <if test="taskVo.timePeriod != null and taskVo.timePeriod != ''">
+                and time_period = #{taskVo.timePeriod}
+            </if>
+            <if test="taskVo.finished != null">
+                and finished = #{taskVo.finished}
+            </if>
+            <if test="taskVo.labelId != null">
+                and t1.label_id = #{taskVo.labelId}
+            </if>
+            <if test="taskVo.startDateCondition != null and taskVo.startDateCondition != '' ">
+                and t1.create_time &gt;= #{taskVo.startDateCondition}
+            </if>
+            <if test="taskVo.endDateCondition != null and taskVo.endDateCondition != '' ">
+                and t1.create_time &lt;= #{taskVo.endDateCondition}
+            </if>
+            <if test="taskVo.nowDate != null and taskVo.nowDate != '' ">
+                and date(t1.create_time) = #{taskVo.nowDate}
+            </if>
+            <if test="taskVo.updateTime != null">
+                and t1.update_time = #{taskVo.updateTime}
+            </if>
+            <if test="taskVo.explan != null and taskVo.explan != ''">
+                and explan = #{taskVo.explan}
+            </if>
+            <if test="taskVo.parentId != null">
+                and parent_id = #{taskVo.parentId}
+            </if>
+            <if test="taskVo.duration != null">
+                and duration = #{taskVo.duration}
+            </if>
+            <if test="taskVo.childTask != null and taskVo.childTask != ''">
+                and child_task = #{taskVo.childTask}
+            </if>
+            <if test="taskVo.flag != null">
+                and flag = #{taskVo.flag}
+            </if>
+        </where>
+    </select>
+
+    <!--按标签分类查询该用户的所有Task-->
+    <select id="selectUserTaskGroupByLabelDay" resultType="com.cloudinwind.selfmanage.vo.time.TaskVo">
+         select t1.*, t2.label_name, t2.label_color
+        from
+        (select time_task.label_id, sum(duration) sum_duration
+				from time_user_task, time_task
+        where time_user_task.user_id =  #{taskVo.userId} and time_task.task_id = time_user_task.task_id
+				and time_task.flag=0 and date(time_task.create_time) = #{taskVo.nowDate}
+				GROUP BY label_id)as t1
+        left join time_label t2 on t1.label_id = t2.label_id
+    </select>
+
+    <!--按优先级分类查询该用户的所有Task-->
+    <select id="selectUserTaskGroupByPriorityDay" resultType="com.cloudinwind.selfmanage.vo.time.TaskVo">
+       select time_task.priority , time_user_task.user_id, sum(duration) sum_duration
+            from time_user_task, time_task
+			where time_user_task.user_id = #{taskVo.userId} and time_task.task_id = time_user_task.task_id
+			and time_task.flag=0 and date(time_task.create_time)= #{taskVo.nowDate}
+			GROUP BY priority
+    </select>
+
+    <!--查询某段时间的任务 duration-->
+    <select id="selectTaskDuration" resultType="java.lang.Integer">
+       select sum(duration) sum_duration_all
+        from time_user_task, time_task
+        where time_user_task.user_id = #{taskVo.userId} and time_task.task_id = time_user_task.task_id
+				and time_task.flag=0
         <where>
             <if test="taskVo.taskId != null">
                 and task_id = #{taskVo.taskId}
